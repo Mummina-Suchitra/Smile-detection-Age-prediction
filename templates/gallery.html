@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2>📸 Captured Images Gallery</h2>
+
+    {% if images %}
+    <div class="row mt-4">
+        {% for img in images %}
+        <div class="col-md-3 mb-4">
+            <div class="card shadow">
+                <img src="{{ url_for('uploaded_file', filename=img.filename) }}" class="card-img-top" alt="Captured Image">
+                <div class="card-body text-start">
+                    <h6><b>Smile:</b> {{ img.smile }}</h6>
+                    <h6><b>Age:</b> {{ img.age }}</h6>
+                    <a href="{{ url_for('uploaded_file', filename=img.filename) }}" download class="btn btn-primary btn-sm w-100 mt-2">Download</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="mt-3 fs-5 text-muted">No images captured yet!</p>
+    {% endif %}
+</div>
+{% endblock %}

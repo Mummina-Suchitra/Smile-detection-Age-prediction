@@ -1,0 +1,143 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4 text-center">
+
+<h3>📸 Photo & Live Video Detection</h3>
+
+<!-- PHOTO UPLOAD & FILTERS -->
+<div class="card mx-auto mt-4 p-3" style="max-width:500px;">
+    <h5>Upload Photo & Adjust Filters</h5>
+    <input type="file" id="photoInput" accept="image/*" class="form-control mb-2">
+    <canvas id="photoCanvas" style="max-width:100%; border:1px solid #ccc; border-radius:10px;"></canvas>
+    
+    <div class="mt-3 text-start">
+        <label>Brightness:</label>
+        <input type="range" id="brightnessSlider" min="0" max="200" value="100">
+        <br>
+        <label>Contrast:</label>
+        <input type="range" id="contrastSlider" min="0" max="200" value="100">
+        <br>
+        <label>Grayscale:</label>
+        <input type="range" id="grayscaleSlider" min="0" max="100" value="0">
+        <br>
+        <label>Sepia:</label>
+        <input type="range" id="sepiaSlider" min="0" max="100" value="0">
+        <br>
+        <button class="btn btn-secondary btn-sm mt-2" onclick="resetFilters()">Original</button>
+    </div>
+
+    <button class="btn btn-primary mt-3 w-100" onclick="predictPhoto()">Predict Photo</button>
+    <p id="photoResult" class="mt-2 fs-5"></p>
+</div>
+
+<!-- LIVE VIDEO -->
+<div class="card mx-auto mt-5 p-3" style="max-width:600px;">
+    <h5>Live Webcam Prediction</h5>
+    <video id="videoFeed" width="500" height="400" autoplay style="border-radius:10px;"></video>
+    <div class="mt-2">
+        <button class="btn btn-success" onclick="startCamera()">Start Capturing</button>
+        <button class="btn btn-danger" onclick="stopCamera()">Stop Capturing</button>
+        <button class="btn btn-primary" onclick="captureFrame()">Capture Frame</button>
+    </div>
+    <p id="videoResult" class="mt-2 fs-5"><b>Status:</b> Waiting for capture...</p>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+// CAMERA
+let video = document.getElementById('videoFeed');
+let stream = null;
+
+async function startCamera() {
+    if(stream && video.srcObject) return; // already running
+    try { 
+        stream = await navigator.mediaDevices.getUserMedia({video:true}); 
+        video.srcObject = stream;
+        document.getElementById('videoResult').innerHTML = "<b>Status:</b> Camera started. Ready to capture.";
+    }
+    catch(e) { 
+        alert("Camera access denied."); 
+    }
+}
+
+function stopCamera(){ 
+    if(stream){ 
+        stream.getTracks().forEach(track=>track.stop()); 
+        video.srcObject=null; 
+        document.getElementById('videoResult').innerHTML = "<b>Status:</b> Camera stopped."; 
+        stream=null;
+    }
+}
+
+// PHOTO FILTERS
+let canvas = document.getElementById('photoCanvas'); 
+let ctx = canvas.getContext('2d'); 
+let img = new Image();
+
+document.getElementById('photoInput').addEventListener('change', e=>{
+    let reader = new FileReader();
+    reader.onload = event=>{ img.src = event.target.result; }
+    reader.readAsDataURL(e.target.files[0]);
+});
+
+img.onload = function(){ 
+    canvas.width=img.width/2; canvas.height=img.height/2; 
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+}
+
+function applyFilters(){
+    let brightness = document.getElementById('brightnessSlider').value;
+    let contrast = document.getElementById('contrastSlider').value;
+    let grayscale = document.getElementById('grayscaleSlider').value;
+    let sepia = document.getElementById('sepiaSlider').value;
+    ctx.filter=`brightness(${brightness}%) contrast(${contrast}%) grayscale(${grayscale}%) sepia(${sepia}%)`;
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+}
+['brightnessSlider','contrastSlider','grayscaleSlider','sepiaSlider'].forEach(id=>document.getElementById(id).addEventListener('input', applyFilters));
+
+function resetFilters(){
+    document.getElementById('brightnessSlider').value=100;
+    document.getElementById('contrastSlider').value=100;
+    document.getElementById('grayscaleSlider').value=0;
+    document.getElementById('sepiaSlider').value=0;
+    applyFilters();
+}
+
+// PHOTO PREDICTION
+function predictPhoto(){
+    let dataURL = canvas.toDataURL('image/png');
+    fetch('/predict_photo',{
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body: JSON.stringify({imageBase64:dataURL})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        document.getElementById('photoResult').innerHTML = `<b>${data.smile_result}</b>, <b>${data.age_result}</b>`;
+        if(data.smile_result.includes('Smiling')) confetti();
+    });
+}
+
+// VIDEO CAPTURE
+function captureFrame(){
+    if(!video.srcObject) return alert("Camera is off");
+    let canvasCapture=document.createElement('canvas'); 
+    canvasCapture.width=video.videoWidth; 
+    canvasCapture.height=video.videoHeight;
+    canvasCapture.getContext('2d').drawImage(video,0,0,canvasCapture.width,canvasCapture.height);
+    let dataURL=canvasCapture.toDataURL('image/png');
+    fetch('/predict_photo',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({imageBase64:dataURL})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        document.getElementById('videoResult').innerHTML=`<b>Status:</b> ${data.smile_result}, ${data.age_result}`;
+        if(data.smile_result.includes('Smiling')) confetti();
+    });
+}
+</script>
+{% endblock %}

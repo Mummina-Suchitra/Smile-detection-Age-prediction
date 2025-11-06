@@ -1,0 +1,101 @@
+/* ------------------- Body & Background ------------------- */
+body {
+    background-color: #121212;  /* Dark background */
+    color: #ffffff;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ------------------- Navbar ------------------- */
+.navbar {
+    background-color: #1f1f1f !important;
+}
+.navbar-brand, .nav-link {
+    color: #ffffff !important;
+    font-weight: 600;
+}
+.navbar-brand:hover, .nav-link:hover {
+    color: #00d1b2 !important;
+}
+
+/* ------------------- Cards ------------------- */
+.card {
+    background-color: #1e1e1e;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.card h5, .card h6 {
+    color: #00d1b2;
+}
+
+/* ------------------- Buttons ------------------- */
+.btn-primary {
+    background-color: #00d1b2;
+    border: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+.btn-primary:hover {
+    background-color: #00b89c;
+}
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+}
+
+/* ------------------- Inputs & Sliders ------------------- */
+input[type="range"] {
+    width: 100%;
+    margin: 5px 0 10px 0;
+}
+
+/* ------------------- Canvas ------------------- */
+canvas {
+    border: 2px solid #ffffff;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* ------------------- Video Feed ------------------- */
+video {
+    border: 2px solid #00d1b2;
+    border-radius: 12px;
+    box-shadow: 0 0 15px #00d1b2;
+}
+
+/* ------------------- Gallery ------------------- */
+.gallery img {
+    border-radius: 12px;
+    border: 2px solid #00d1b2;
+    box-shadow: 0 4px 15px rgba(0, 209, 178, 0.5);
+    transition: 0.3s;
+}
+.gallery img:hover {
+    transform: scale(1.05);
+}
+
+/* ------------------- Prediction Text ------------------- */
+#photoResult, #videoResult {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #00d1b2;
+}
+
+/* ------------------- Misc ------------------- */
+h2, h3 {
+    color: #ffffff;
+}
+p, label {
+    color: #cccccc;
+}
